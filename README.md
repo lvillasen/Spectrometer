@@ -1,5 +1,4 @@
 # Visualizing and Analyzing Light Spectra with a Webcam-Based Spectrometer
-Web app to visualize and analyze data webcam-based spectrometer
 
 ## Features of this Web Application
 
