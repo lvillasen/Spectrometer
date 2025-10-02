@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+      <title>Spectrometer</title>
+      <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+</script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+ <script type="text/javascript"src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>  
+   <link rel="stylesheet" href="./spectrum2.css" />
+  </head>
+  <body>
+  <div class="block_container" style="background-color: #00b5e2; margin-left: 10%; margin-right: 10%">
+    <!-- comment-->
+<h1>Visualizing and Analyzing Light Spectra</h1>
+    <h2>CIIEC-BUAP</h2>
+
+    <p style="font-size: 30px; margin-left: 80%; margin-bottom: 0;">September 19th, 2025</p>
+<p style="font-size: 20px; margin-left: 80%; margin-top: 0;">
+  <a href="https://github.com/lvillasen/Spectrometer">Source Code</a>
+</p>
+    <hr />
+    <button class="new_styled" aria-pressed="false" onclick="introBlock()">
+      Introduction
+    </button>
+    <div id="introBlock">
+      <center><img src="cfl_little_garden.png" style="width:60%; border: 2px solid black;"></center>
+<p>Spectrum of a compact fluorescent lamp, recorded using this web application with “Little Garden” — a commercial light spectrometer that is affordable yet delivers high quality.
+     </p> <br>
+<h2>What is a Light Spectrometer?</h2>
+<p>
+A <strong>light or optical spectrometer</strong> is a tool that helps us study light. Instead of looking at light as a single beam, a spectrometer spreads it out into its different colors (or wavelengths), like a rainbow. This is usually done with a prism or a special grating. A sensor then measures how bright each color is, creating something called a spectrum.
+</p>
+<br>
+<p>
+By looking at these spectra, scientists can discover all kinds of information: what a material is made of, how much of something is present, or even the temperature of a star. Spectrometers are used in many areas—from studying distant galaxies and measuring redshifts, to checking pollution in the air, to analyzing chemicals in a lab.
+</p>
+
+    <hr>
+<h2>Features of this Web Application</h2>
+
+    <div class="section-box">
+        <h3>A. Video & Region of Interest (ROI) Controls</h3>
+        <ul>
+            <li><strong>Resolution Selection:</strong> A dropdown menu allows the user to choose the webcam's video resolution (e.g., 1920x1080, 640x480). The app displays the **"Resolution in Use"** in real-time.</li>
+            <li><strong>ROI Definition:</strong> Users click and drag on the live video feed to define a red bounding box, the **Region of Interest**, to isolate the spectral stripe for analysis.</li>
+            <li><strong>Cropped View:</strong> A dedicated canvas shows the live image data only from the **Selected Region**, confirming the area being analyzed.</li>
+            <li><strong>Invert:</strong> A checkbox to horizontally **invert** the video and cropped image, useful if the spectrometer optics flip the spectrum.</li>
+        </ul>
+    </div>
+
+    <div class="section-box">
+        <h3>B. Signal Processing & Weighting</h3>
+        <p>This controls how the three color channels (RGB) are combined to produce a single intensity value.</p>
+        <ul>
+            <li><strong>RGB Weights (Pesos RGB):</strong> Three range sliders allow the user to adjust the weight (0.00 to 1.00) for the **Red (R)**, **Green (G)**, and **Blue (B)** channels.</li>
+            <li><strong>Normalized Weights:</strong> Displays the final, normalized weights (where R + G + B = 1) used in the intensity calculation.</li>
+        </ul>
+    </div>
+
+    <div class="section-box">
+        <h3>C. Spectrum Plot Controls</h3>
+        <p>These options manage the real-time visualization and basic analysis of the spectrum data.</p>
+        
+        <table class="feature-table">
+            <thead>
+                <tr>
+                    <th>Control</th>
+                    <th>Function</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Markers</strong></td>
+                    <td>Toggles the display of individual data points along the spectrum line.</td>
+                </tr>
+                <tr>
+                    <td><strong>Auto Scale</strong></td>
+                    <td>Automatically adjusts the Y-axis (Intensity) range based on the live data.</td>
+                </tr>
+                <tr>
+                    <td><strong>Peaks</strong></td>
+                    <td>Automatically detects local maxima in the spectrum and marks them with vertical red dotted lines.</td>
+                </tr>
+                <tr>
+                    <td><strong>Pause</strong></td>
+                    <td>Freezes the real-time data acquisition and plot updates.</td>
+                </tr>
+                <tr>
+                    <td><strong>Average</strong></td>
+                    <td>Activates frame averaging, accumulating data from multiple video frames to significantly reduce signal noise.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section-box">
+        <h3>D. Calibration Pixel/Wavelength</h3>
+        <ul>
+            <li><strong>Number of Points for Calibration:</strong> A dropdown to select the number of reference points (2, 3, or 4) required for the calibration curve.</li>
+            <li><strong>Calibration Inputs:</strong> Dynamic input fields are generated for the user to enter known **Pixel X** coordinates and their corresponding **Wavelengths (nm)** (e.g., from a calibration lamp).</li>
+            <li><span class="main-feature">Calibrate Button:</span> Executes the calculation to transform the X-axis from pixels into physical **Wavelength (nm)**.</li>
+            <li><span class="main-feature">Save/Load Calibration:</span> Buttons to save the calibration factors as a JSON file and load a previously saved calibration file.</li>
+            <li><span class="main-feature">Save CSV File:</span> Exports the current spectral data (X-axis values and Intensity) into a CSV file for external analysis.</li>
+        </ul>
+        <strong>This web application does not calibrate the light intensity (maybe in a next version).</strong>
+    </div>
+
+    <div class="section-box">
+        <h3>E. Visual Display</h3>
+        <p>A secondary visualization area used for detailed display after calibration.</p>
+        <ul>
+            <li><strong>Spectrum Fill:</strong> When calibrated, the canvas fills the area under the curve with colors corresponding to the calculated wavelength, creating a visual spectrum.</li>
+            <li><strong>Flexible X-Axis grid.</strong></li>
+            <li><strong>Scale Canvas:</strong> A separate canvas that draws the X-axis scale.</li>
+        </ul>
+    </div>
+
+          <h2>Learn more about Spectrometers</h2>
+  <ul>
+    
+    <li><a href="https://www.ossila.com/pages/history-of-spectroscopy" target="_blank">
+      History of Spectroscopy</a></li>
+    <li><a href="https://www.nist.gov/spectroscopy/what-spectroscopy" target="_blank">
+      Spectroscopy: A Measurement Powerhouse</a></li>
+    <li><a href="https://www.britannica.com/science/spectroscopy" target="_blank">
+      Encyclopedia Britannica - Spectroscopy</a></li>
+    <li><a href="https://www.nist.gov/pml/optical-spectroscopy" target="_blank">
+      NIST - Optical Spectroscopy</a></li>
+    <li><a href="https://www.edinst.com/us/blog/what-is-a-spectrometer-and-how-does-it-work/" target="_blank">
+      Edinburgh Instruments - How Spectrometers Work</a></li>
+  </ul>
+        <br>
+
+    </div>
+
+<hr>
+  <button class="new_styled" aria-pressed="false" onclick="gratingBlock()">
+    Diffraction Grating
+  </button>
+  <div id="gratingBlock">
+    <center>
+      <h2>Calculation of Diffraction Angles</h2>
+    </center>
+ 
+<p>The basis of a spectrometer that uses a diffraction grating is the diffraction grating itself. The physics of diffrection is described by the diffraction grating equation
+
+$$
+d(sin \theta_i + sin \theta_n) = n\lambda
+$$
+
+where <i>d</i> is the distance between tracks on the grating, 
+$
+\theta_i
+$
+is the incidence angle, <i>n</i> is the order of diffraction, 
+
+$
+\theta_n
+$ is the diffraction angle, and 
+$
+\lambda
+$
+
+ is the wavelength of any particular color.
+</p>
+    <center><img src="grating.png" style="width:60%; border: 2px solid black;">
+      <p>The plot above shows 3 orders of diffraction angles for a DVD (1350 tracks per mm) at 16° wrt the incident ligth.<br>
+        <strong>You can experiment with different configurations of diffraction gratings
+        <a href="https://ciiec.buap.mx/Spectrum1
+"> here </a></strong>
+      </p>
+      <br>
+
+  </div>
+
+<hr>
+  <button class="new_styled" aria-pressed="false" onclick="cflBlock()">
+    Spectrum of a Compact Fluorescence Lamp
+  </button>
+  <div id="cflBlock">
+    <center>
+      <h2>Spectral Peaks of a Compact Fluorescence Lamp <br>(Uncalibrated for Intensity)</h2>
+    </center>
+    <center><img src="cfl3.png" style="width:60%; border: 2px solid black;">
+      <p><b>Source:</b>
+        <a href="https:ciiec.buap.mx/Make-your-Own-Spectroscope/
+">Spectrum of a compact fluorescent lamp taken with a simple DIY spectrometer</a>
+      </p>
+      <center><img src="cfl.png" style="width:60%; border: 2px solid black; background-color:white;">
+        <p><b>Source:</b>
+          <a href="https://commons.wikimedia.org/wiki/File:Fluorescent_lighting_spectrum_peaks_labelled.svg
+">Fluorescent lighting spectrum peaks</a>
+        </p>
+
+        <div id="spectral-table"></div>
+        <p><b>Source:</b>
+          <a href="https://commons.wikimedia.org/wiki/File:Fluorescent_lighting_spectrum_peaks_labelled.svg
+">Fluorescent lighting spectrum peaks</a>
+        </p>
+
+  </div>
+  <hr>
+  <button class="new_styled" aria-pressed="false" onclick="sunBlock()">
+    Spectrum of the Sun
+  </button>
+  <div id="sunBlock">
+    <center>
+      <h2>Solar Spectrum</h2>
+    </center>
+    <center><img src="sun.jpg" style="width:60%; border: 2px solid black;">
+      <p><b>Source: </b>
+        <a href="https://www.sciencedirect.com/topics/physics-and-astronomy/solar-spectra
+">Solar Spectra</a></p>
+      <center><img src="fraunhofer.png" style="width:60%; border: 2px solid black; background-color:white;">
+        <p><b>Source:</b>
+          <a href="https://en.wikipedia.org/wiki/Fraunhofer_lines
+">Fraunhofer Lines</a>
+        </p>
+
+  </div>
+    <hr />
+    <button class="new_styled" aria-pressed="false" onclick="connectBlock()">
+      Connect your Own Spectrometer
+    </button>
+    <div id="connectBlock">
+    <div>
+            <center>
+            <h3 style="font-style: italic;"> Select a Resolution to Start the Camera</h3>
+</center>
+      <center>
+      <label
+        >Resolution:
+        <select id="resSelect">
+  <option value="" disabled selected>Resolution</option> 
+
+  <option value="4096x2160">4096 x 2160</option>
+  <option value="2560x1440">2560 x 1440</option>
+  <option value="1920x1080" >1920 x 1080</option>
+  <option value="1280x720">1280 x 720</option>
+  <option value="640x480">640 x 480</option>
+</select>
+      </label>
+      <span id="realRes"></span>
+      </center>
+      <center>
+            <h3 style="font-style: italic;"> Use your Mouse to Select a Region of Interest around the Spectrum on the Video</h3>
+</center>
+    </div>
+
+<div id="videoContainer" 
+     style="border: 2px solid black; display:flex; justify-content:center; align-items:center;">
+  <video id="video" autoplay></video>
+  <canvas id="overlay"></canvas>
+</div>
+    <br>
+    <br>
+
+    <center>
+
+    <h3>Normalized RGB Weights:
+    R=<span id="normR"></span>,
+    G=<span id="normG"></span>,
+    B=<span id="normB"></span>
+  </h3>
+    </center>
+
+<div style="display:flex;justify-content:center; gap:1em; align-items:center;">
+
+  <div style="display:flex; align-items:center; gap:0.3em;">
+    <label style="white-space:nowrap;">R: <span id="valR">0.33</span></label>
+    <input type="range" id="sliderR" min="0" max="1" step="0.01" value="0.333">
+  </div>
+
+  <div style="display:flex; align-items:center; gap:0.3em;">
+    <label style="white-space:nowrap;">G: <span id="valG">0.5</span></label>
+    <input type="range" id="sliderG" min="0" max="1" step="0.01" value="0.3333">
+  </div>
+
+  <div style="display:flex; align-items:center; gap:0.3em;">
+    <label style="white-space:nowrap;">B: <span id="valB">0.7</span></label>
+    <input type="range" id="sliderB" min="0" max="1" step="0.01" value="0.333">
+  </div>
+
+</div>
+
+  <center>
+    <h3>Region of Interest</h3>
+    <canvas id="cropCanvas" width="200" height="200" style="border: 2px solid black;"></canvas>
+  </center>
+
+  
+
+      <center>
+ <label for="markers" style="display:inline-flex; align-items:center; font-size:16px; cursor:pointer;">
+  Markers
+  <input type="checkbox" id="markers" style="position: relative; left: -2px;"checked >
+</label>
+<label for="autoScale" style="display:inline-flex; align-items:center; font-size:16px; cursor:pointer;">
+  Auto Scale
+  <input type="checkbox" id="autoScale" style="position: relative; left: -2px;">
+</label>
+<label for="logScale" style="display:inline-flex; align-items:center; font-size:16px; cursor:pointer;">
+  Log Scale
+  <input type="checkbox" id="logScale" style="position: relative; left: -2px;">
+</label>
+<label for="peaks" style="display:inline-flex; align-items:center; font-size:16px; cursor:pointer;">
+  Peaks
+  <input type="checkbox" id="peaks" style="margin-left:1px;">
+</label>
+
+<label for="invert" style="display:inline-flex; align-items:center; font-size:16px; cursor:pointer;">
+  Invert
+  <input type="checkbox" id="invert" style="margin-left:1px;" checked>
+
+</label>
+
+<label for="pause" style="display:inline-flex; align-items:center; font-size:16px; cursor:pointer;">
+  Pause
+  <input type="checkbox" id="pause" style="margin-left:1px;">
+</label>
+
+<label for="average" style="display:inline-flex; align-items:center; font-size:16px; cursor:pointer;">
+  Average
+  <input type="checkbox" id="average" style="margin-left:1px;">
+</label>
+
+  </center>
+
+    <center>
+    <div id="plot" style="border: 2px solid black;"></div>
+
+    <div id="calibrateBlock">
+      </center>
+<center>
+  <br>
+
+<div style="display:flex; align-items:center; justify-content:center;gap:10px;">
+  <h3 style="margin:0; line-height:1; font-style: italic;">Select Number of Points for Calibration:</h3>
+
+  <select id="numPoints" style="margin:0; position:relative; top:2px;">
+    <option value="" disabled selected>Number</option> 
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+  </select>
+
+</div>
+
+  <div id="inputs"></div>
+  </center>
+
+<center>
+ <button id="calibrateBtn" type="button" class="new_styled" aria-pressed="false"
+  style="background-color: rgb(147, 234, 17);">
+  Calibrate
+</button>
+
+
+<button id="saveCalibBtn" class="new_styled" aria-pressed="false">Save Calibration</button>
+
+<button id="loadCalibBtn" class="new_styled">Load Calibration</button>
+
+
+<input type="file" id="loadCalibFile" accept=".json" style="display:none;" />
+  <button id="saveCSV" type="button" class="new_styled" aria-pressed="false" style="background-color: rgb(147, 234, 17);">Save CSV File </button>
+
+</center>
+
+    <div>
+      <center>
+
+ <label style="font-size: 13pt; margin-left: 12px">X-Axis Grid (nm):</label>
+
+        <select id="gridScale">
+          <option value="-1" >None</option>
+          <option value="10" >10</option>
+
+          <option value="20" selected>20</option>
+          <option value="50" >50</option>
+          <option value="100">100</option>
+        </select>
+      </center>
+      <br>
+<center>
+    <div style="line-height: 0; margin: 0; padding: 0;">
+    <canvas id="canvas1" width="800" height="400" style="vertical-align: bottom; border: 2px solid black;"></canvas>
+    <canvas id="scaleCanvas" width="800" height="60" style="vertical-align: bottom; border: 2px solid black;"></canvas>
+
+  </div>
+</center>
+
+  </div>
+  </center>
+  <br><br>
+</div>
+<hr>
+<br>
+
+
+
+      </div>
+
+</div>
+<script src="spectroum2.js"></script>
+
+  </body>
+</html>
